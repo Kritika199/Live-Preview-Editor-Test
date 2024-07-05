@@ -1,4 +1,4 @@
-New js Notes
+
 
 // Salesforce Marketing Cloud SDK Initialization
 var SDK = function (config, whitelistOverride, sslOverride) {
