@@ -309,8 +309,8 @@ if (typeof(window) === 'object') {
     // Initialize the editor when the document is ready
     document.addEventListener('DOMContentLoaded', function() {
         enableEditMode();
-        document.addEventListener('DOMContentLoaded', content() {
-        enableEditMode();
+        document.addEventListener('DOMContentLoaded', function() {
+        newContent();
     });
     });
 }
