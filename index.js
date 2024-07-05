@@ -246,6 +246,7 @@ if (typeof(window) === 'object') {
         tabs: [
             'htmlblock',
             'stylingblock',
+            'textblock',
             'richTextField'
         ],
         onEditClose: function() {
