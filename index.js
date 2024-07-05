@@ -236,17 +236,16 @@ SDK.prototype._validateOrigin = function _validateOrigin (origin) {
 if (typeof(window) === 'object') {
     window.sfdc = window.sfdc || {};
     window.sfdc.BlockSDK = SDK;
-     
 
     // Example usage with additional functions
 
     // SDK initialization
     var sdk = new window.sfdc.BlockSDK({
         blockEditorWidth: 600,
+        key: 'richTextField',
         tabs: [
             'htmlblock',
-            'stylingblock',
-            'richTextField'
+            'stylingblock'
         ],
         onEditClose: function() {
             // Save content before closing the block
@@ -265,27 +264,32 @@ if (typeof(window) === 'object') {
             richTextField.write(content || '');
             richTextField.close();
 
-            // Set the initial content as the super content for live preview
-            sdk.setSuperContent(content, function(newSuperContent) {
-                console.log('Super Content set:', newSuperContent);
+            // Set the initial content and super content for live preview
+            sdk.setContent(content, function(newContent) {
+                console.log('Content set:', newContent);
+                sdk.setSuperContent(newContent, function(newSuperContent) {
+                    console.log('Super Content set:', newSuperContent);
+                    // Update the preview area with the new super content
+                    updatePreview(newSuperContent);
+                });
             });
         });
     }
 
     // Execute Rich Text Commands
-    function Edit(command) {
+    function execCommand(command) {
         const richTextField = document.getElementById("richTextField").contentWindow.document;
         richTextField.execCommand(command, false, null);
 
-        // Update the content in Salesforce Marketing Cloud
+        // Update the content and super content in Salesforce Marketing Cloud
         updateContent();
     }
 
-    function execVal(command, value) {
+    function execCommandWithValue(command, value) {
         const richTextField = document.getElementById("richTextField").contentWindow.document;
         richTextField.execCommand(command, false, value);
 
-        // Update the content in Salesforce Marketing Cloud
+        // Update the content and super content in Salesforce Marketing Cloud
         updateContent();
     }
 
@@ -297,8 +301,16 @@ if (typeof(window) === 'object') {
             console.log('Updated Content:', updatedContent);
             sdk.setSuperContent(updatedContent, function(newSuperContent) {
                 console.log('Super Content set:', newSuperContent);
+                // Update the preview area with the new super content
+                updatePreview(newSuperContent);
             });
         });
+    }
+
+    // Update live preview area with new content
+    function updatePreview(content) {
+        const previewArea = document.getElementById('livePreviewArea');
+        previewArea.innerHTML = content;
     }
 
     // Initialize the editor when the document is ready
