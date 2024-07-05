@@ -59,42 +59,60 @@ SDK.prototype.getCentralData = function (cb) {
     });
 };
 
-// Separate methods for handling different block types
-
-SDK.prototype.getHtmlBlockContent = function (cb) {
-    this.execute('getHtmlBlockContent', {
+SDK.prototype.getContent = function (cb) {
+    this.execute('getContent', {
         success: cb
     });
 };
 
-SDK.prototype.getStylingBlockContent = function (cb) {
-    this.execute('getStylingBlockContent', {
+SDK.prototype.getData = function (cb) {
+    this.execute('getData', {
         success: cb
     });
 };
 
-SDK.prototype.getRichTextEditorContent = function (cb) {
-    this.execute('getRichTextEditorContent', {
+SDK.prototype.getUserData = function (cb) {
+    this.execute('getUserData', {
         success: cb
     });
 };
 
-SDK.prototype.setHtmlBlockContent = function (content, cb) {
-    this.execute('setHtmlBlockContent', {
+SDK.prototype.getView = function (cb) {
+    this.execute('getView', {
+        success: cb
+    });
+};
+
+SDK.prototype.setBlockEditorWidth = function (value, cb) {
+    this.execute('setBlockEditorWidth', {
+        data: value,
+        success: cb
+    });
+};
+
+SDK.prototype.setCentralData = function (dataObj, cb) {
+    this.execute('setCentralData', {
+        data: dataObj,
+        success: cb
+    });
+};
+
+SDK.prototype.setContent = function (content, cb) {
+    this.execute('setContent', {
         data: content,
         success: cb
     });
 };
 
-SDK.prototype.setStylingBlockContent = function (content, cb) {
-    this.execute('setStylingBlockContent', {
-        data: content,
+SDK.prototype.setData = function (dataObj, cb) {
+    this.execute('setData', {
+        data: dataObj,
         success: cb
     });
 };
 
-SDK.prototype.setRichTextEditorContent = function (content, cb) {
-    this.execute('setRichTextEditorContent', {
+SDK.prototype.setSuperContent = function (content, cb) {
+    this.execute('setSuperContent', {
         data: content,
         success: cb
     });
@@ -223,37 +241,24 @@ if (typeof(window) === 'object') {
     // SDK initialization
     var sdk = new window.sfdc.BlockSDK({
         blockEditorWidth: 600,
+        tabs: [
+            'htmlblock',
+            'stylingblock',
+            'richTextField'
+        ],
         onEditClose: function() {
             // Save content before closing the block
             updateContent();
         }
     });
 
-    // Enable Edit Mode for each type of block
+    // Enable Edit Mode for Rich Text Editor
+    function enableEditMode() {
+        const richTextField = document.getElementById("richTextField").contentWindow.document;
+        richTextField.designMode = "on";
 
-    function enableHtmlBlockEditMode() {
-        sdk.getHtmlBlockContent(function(content) {
-            // Handle loading HTML block content
-            console.log('HTML Block Content:', content);
-            // Example: Load content into HTML block editor
-        });
-    }
-
-    function enableStylingBlockEditMode() {
-        sdk.getStylingBlockContent(function(content) {
-            // Handle loading styling block content
-            console.log('Styling Block Content:', content);
-            // Example: Load content into styling block editor
-        });
-    }
-
-    function enableRichTextEditorEditMode() {
-        sdk.getRichTextEditorContent(function(content) {
-            // Handle loading rich text editor content
-            console.log('Rich Text Editor Content:', content);
-            // Example: Load content into rich text editor
-            const richTextField = document.getElementById("richTextField").contentWindow.document;
-            richTextField.designMode = "on";
+        // Load the initial content from Salesforce Marketing Cloud
+        sdk.getContent(function(content) {
             richTextField.open();
             richTextField.write(content || '');
             richTextField.close();
@@ -265,14 +270,43 @@ if (typeof(window) === 'object') {
         });
     }
 
-    // Initialize the editors when the document is ready
+    // Execute Rich Text Commands
+    function Edit(command) {
+        const richTextField = document.getElementById("richTextField").contentWindow.document;
+        richTextField.execCommand(command, false, null);
+
+        // Update the content in Salesforce Marketing Cloud
+        updateContent();
+    }
+
+    function execVal(command, value) {
+        const richTextField = document.getElementById("richTextField").contentWindow.document;
+        richTextField.execCommand(command, false, value);
+
+        // Update the content in Salesforce Marketing Cloud
+        updateContent();
+    }
+
+    // Update Content in Salesforce Marketing Cloud
+    function updateContent() {
+        const richTextField = document.getElementById("richTextField").contentWindow.document;
+        var content = richTextField.body.innerHTML;
+        sdk.setContent(content, function(updatedContent) {
+            console.log('Updated Content:', updatedContent);
+            sdk.setSuperContent(updatedContent, function(newSuperContent) {
+                console.log('Super Content set:', newSuperContent);
+            });
+        });
+    }
+
+    // Initialize the editor when the document is ready
     document.addEventListener('DOMContentLoaded', function() {
-        enableHtmlBlockEditMode();
-        enableStylingBlockEditMode();
-        enableRichTextEditorEditMode();
+        enableEditMode();
     });
 }
 
 if (typeof(module) === 'object') {
     module.exports = SDK;
 }
+
+
