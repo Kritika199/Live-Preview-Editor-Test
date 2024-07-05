@@ -265,7 +265,7 @@ if (typeof(window) === 'object') {
             richTextField.close();
 
             // Set the initial content as the super content for live preview
-            sdk.setSuperContent(richTextField.body.innerHTML, function(newSuperContent) {
+            sdk.setSuperContent(richTextField.documentElement.outerHTML, function(newSuperContent) {
                 console.log('Super Content set:', newSuperContent);
             });
         });
@@ -291,7 +291,7 @@ if (typeof(window) === 'object') {
     // Update Content in Salesforce Marketing Cloud
     function updateContent() {
         const richTextField = document.getElementById("richTextField").contentWindow.document;
-        var content = richTextField.body.innerHTML;
+        var content = richTextField.documentElement.outerHTML;
         sdk.setContent(content, function(updatedContent) {
             console.log('Updated Content:', updatedContent);
             sdk.setSuperContent(updatedContent, function(newSuperContent) {
