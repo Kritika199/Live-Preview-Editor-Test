@@ -100,7 +100,12 @@ SDK.prototype.setCentralData = function (dataObj, cb) {
 SDK.prototype.setContent = function (content, cb) {
     this.execute('setContent', {
         data: content,
-        success: cb
+        success: function(newContent) {
+            if (cb) cb(newContent);
+        },
+        error: function(error) {
+            console.error('Error setting content:', error);
+        }
     });
 };
 
@@ -114,7 +119,12 @@ SDK.prototype.setData = function (dataObj, cb) {
 SDK.prototype.setSuperContent = function (content, cb) {
     this.execute('setSuperContent', {
         data: content,
-        success: cb
+        success: function(newSuperContent) {
+            if (cb) cb(newSuperContent);
+        },
+        error: function(error) {
+            console.error('Error setting super content:', error);
+        }
     });
 };
 
@@ -234,7 +244,6 @@ SDK.prototype._validateOrigin = function _validateOrigin (origin) {
 if (typeof(window) === 'object') {
     window.sfdc = window.sfdc || {};
     window.sfdc.BlockSDK = SDK;
-     
 
     // Example usage with additional functions
 
@@ -263,9 +272,13 @@ if (typeof(window) === 'object') {
             richTextField.write(content || '');
             richTextField.close();
 
-            // Set the initial content as the super content for live preview
-            sdk.setSuperContent(content, function(newSuperContent) {
-                console.log('Super Content set:', newSuperContent);
+            // Set the initial content in Salesforce Marketing Cloud
+            sdk.setContent(content, function(newContent) {
+                console.log('Content set:', newContent);
+                // Set the initial content as the super content for live preview
+                sdk.setSuperContent(newContent, function(newSuperContent) {
+                    console.log('Super Content set:', newSuperContent);
+                });
             });
         });
     }
