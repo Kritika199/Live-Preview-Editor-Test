@@ -262,7 +262,7 @@ if (typeof(window) === 'object') {
             richTextField.open();
             richTextField.write(content || '');
             richTextField.close();
-
+    sdk.setContent(content, function(getContent) {
             // Set the initial content as the super content for preview
             sdk.setSuperContent(content, function(newSuperContent) {
                 console.log('Super Content set:', newSuperContent);
@@ -304,6 +304,28 @@ if (typeof(window) === 'object') {
         enableEditMode();
     });
 }
+// Set Super Content for Preview
+    sdk.setSuperContent('Preview Content', function(newSuperContent) {
+        console.log('New Super Content:', newSuperContent);
+    });
+
+    // Set Custom Metadata
+    const metadata = { userPreference: 'darkMode' };
+    sdk.setData(metadata, function(updatedMetadata) {
+        console.log('Updated Metadata:', updatedMetadata);
+    });
+
+    // Get User Data
+    sdk.getUserData(function(userData) {
+        console.log('User Data:', userData);
+    });
+
+    // Set Block Editor Width
+    sdk.setBlockEditorWidth(500, function() {
+        console.log('Block width set to 500px');
+    });
+}
+
 
 if (typeof(module) === 'object') {
     module.exports = SDK;
