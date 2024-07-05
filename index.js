@@ -265,12 +265,17 @@ if (typeof(window) === 'object') {
             richTextField.write(content || '');
             richTextField.close();
 
-            // Set the initial content as the super content for live preview
-            sdk.setSuperContent(content, function(newSuperContent) {
-                console.log('Super Content set:', newSuperContent);
+            // Set initial content in Salesforce Marketing Cloud
+            sdk.setContent(content, function(newContent) {
+                console.log('Content set:', newContent);
+                // Set initial content as super content for live preview
+                sdk.setSuperContent(newContent, function(newSuperContent) {
+                    console.log('Super Content set:', newSuperContent);
+                });
             });
         });
     }
+
 
     // Execute Rich Text Commands
     function Edit(command) {
@@ -304,7 +309,11 @@ if (typeof(window) === 'object') {
     // Initialize the editor when the document is ready
     document.addEventListener('DOMContentLoaded', function() {
         enableEditMode();
+        document.addEventListener('DOMContentLoaded', content() {
+        enableEditMode();
     });
+    });
+}
 }
 
 if (typeof(module) === 'object') {
