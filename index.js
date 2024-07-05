@@ -25,11 +25,15 @@ var SDK = function (config, whitelistOverride, sslOverride) {
 
     window.addEventListener('message', this._receiveMessage, false);
 
-    window.parent.postMessage({
-        method: 'handShake',
-        origin: window.location.origin,
-        payload: config
-    }, '*');
+    try {
+        window.parent.postMessage({
+            method: 'handShake',
+            origin: window.location.origin,
+            payload: config
+        }, '*');
+    } catch (err) {
+        console.error('Error sending handshake message:', err);
+    }
 };
 
 SDK.prototype.execute = function execute(method, options) {
@@ -55,66 +59,45 @@ SDK.prototype.execute = function execute(method, options) {
 
 SDK.prototype.getCentralData = function (cb) {
     this.execute('getCentralData', {
-        success: cb
+        success: cb,
+        error: function(err) {
+            console.error('Error retrieving central data:', err);
+        }
     });
 };
 
 SDK.prototype.getContent = function (cb) {
     this.execute('getContent', {
-        success: cb
-    });
-};
-
-SDK.prototype.getData = function (cb) {
-    this.execute('getData', {
-        success: cb
-    });
-};
-
-SDK.prototype.getUserData = function (cb) {
-    this.execute('getUserData', {
-        success: cb
-    });
-};
-
-SDK.prototype.getView = function (cb) {
-    this.execute('getView', {
-        success: cb
-    });
-};
-
-SDK.prototype.setBlockEditorWidth = function (value, cb) {
-    this.execute('setBlockEditorWidth', {
-        data: value,
-        success: cb
-    });
-};
-
-SDK.prototype.setCentralData = function (dataObj, cb) {
-    this.execute('setCentralData', {
-        data: dataObj,
-        success: cb
-    });
-};
-
-SDK.prototype.setContent = function (content, cb) {
-    this.execute('setContent', {
-        data: content,
-        success: cb
+        success: function(content) {
+            try {
+                cb(content);
+            } catch (err) {
+                console.error('Error in getContent callback:', err);
+            }
+        },
+        error: function(err) {
+            console.error('Error retrieving content:', err);
+        }
     });
 };
 
 SDK.prototype.setData = function (dataObj, cb) {
     this.execute('setData', {
         data: dataObj,
-        success: cb
+        success: cb,
+        error: function(err) {
+            console.error('Error setting data:', err);
+        }
     });
 };
 
 SDK.prototype.setSuperContent = function (content, cb) {
     this.execute('setSuperContent', {
         data: content,
-        success: cb
+        success: cb,
+        error: function(err) {
+            console.error('Error setting super content:', err);
+        }
     });
 };
 
@@ -137,27 +120,6 @@ SDK.prototype.triggerAuth = function (appID) {
     });
 };
 
-SDK.prototype.triggerAuth2 = function (authInfo) {
-    var iframe = document.createElement('IFRAME');
-    var scope = '';
-    var state = '';
-    if(Array.isArray(authInfo.scope)) {
-        scope = '&scope=' + authInfo.scope.join('%20');
-    }
-    if(authInfo.state) {
-        state = '&state=' + authInfo.state;
-    }
-    iframe.src = authInfo.authURL + (authInfo.authURL.endsWith('/') ? '':'/') + 'v2/authorize?response_type=code&client_id=' + authInfo.clientId + '&redirect_uri=' + encodeURIComponent(authInfo.redirectURL) + scope + state;
-    iframe.style.width= '1px';
-    iframe.style.height = '1px';
-    iframe.style.position = 'absolute';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
-    iframe.style.visibility = 'hidden';
-    iframe.className = 'authframe';
-    document.body.appendChild(iframe);
-};
-
 /* Internal Methods */
 
 SDK.prototype._executePendingMessages = function _executePendingMessages () {
@@ -176,9 +138,9 @@ SDK.prototype._executePendingMessages = function _executePendingMessages () {
 SDK.prototype._post = function _post (payload, callback) {
     this._messages[this._messageId] = callback;
     payload.id = this._messageId;
-    this._messageId += 1;
     // the actual postMessage always uses the validated origin
     window.parent.postMessage(payload, this._parentOrigin);
+    this._messageId += 1;
 };
 
 SDK.prototype._receiveMessage = function _receiveMessage (message) {
@@ -234,7 +196,6 @@ SDK.prototype._validateOrigin = function _validateOrigin (origin) {
 if (typeof(window) === 'object') {
     window.sfdc = window.sfdc || {};
     window.sfdc.BlockSDK = SDK;
-     
 
     // Example usage with additional functions
 
@@ -259,32 +220,27 @@ if (typeof(window) === 'object') {
 
         // Load the initial content from Salesforce Marketing Cloud
         sdk.getContent(function(content) {
-            richTextField.open();
-            richTextField.write(content || '');
-            richTextField.close();
+            try {
+                richTextField.open();
+                richTextField.write(content || '');
+                richTextField.close();
 
-            // Set the initial content as the super content for preview
-            sdk.setSuperContent(content, function(newSuperContent) {
-                console.log('Super Content set:', newSuperContent);
-            });
+                // Set the initial content as the super content for preview
+                sdk.setSuperContent(content, function(newSuperContent) {
+                    console.log('Super Content set:', newSuperContent);
+                });
+            } catch (err) {
+                console.error('Error loading content:', err);
+            }
         });
-    }
 
-    // Execute Rich Text Commands
-    function Edit(command) {
-        const richTextField = document.getElementById("richTextField").contentWindow.document;
-        richTextField.execCommand(command, false, null);
-
-        // Update the content in Salesforce Marketing Cloud
-        updateContent();
-    }
-
-    function execVal(command, value) {
-        const richTextField = document.getElementById("richTextField").contentWindow.document;
-        richTextField.execCommand(command, false, value);
-
-        // Update the content in Salesforce Marketing Cloud
-        updateContent();
+        // Update preview on rich text editor change events
+        richTextField.addEventListener('input', function() {
+            // Delayed update to prevent frequent updates during typing
+            setTimeout(function() {
+                updateContentPreview();
+            }, 300); // Adjust delay time as needed
+        });
     }
 
     // Update Content in Salesforce Marketing Cloud
@@ -299,6 +255,15 @@ if (typeof(window) === 'object') {
         });
     }
 
+    // Update Live Preview in Salesforce Marketing Cloud
+    function updateContentPreview() {
+        const richTextField = document.getElementById("richTextField").contentWindow.document;
+        var content = richTextField.body.innerHTML;
+        sdk.setSuperContent(content, function(newSuperContent) {
+            console.log('Live Preview Updated:', newSuperContent);
+        });
+    }
+
     // Initialize the editor when the document is ready
     document.addEventListener('DOMContentLoaded', function() {
         enableEditMode();
@@ -308,5 +273,3 @@ if (typeof(window) === 'object') {
 if (typeof(module) === 'object') {
     module.exports = SDK;
 }
-
-
