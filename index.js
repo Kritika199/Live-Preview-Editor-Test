@@ -243,7 +243,8 @@ if (typeof(window) === 'object') {
         blockEditorWidth: 600,
         tabs: [
             'htmlblock',
-            'stylingblock'
+            'stylingblock',
+            'richTextField'
         ],
         onEditClose: function() {
             // Save content before closing the block
