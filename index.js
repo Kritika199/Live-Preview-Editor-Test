@@ -234,12 +234,9 @@ if (typeof(window) === 'object') {
             }
         });
 
-        // Update preview on rich text editor change events
+        // Update live preview on rich text editor input events
         richTextField.addEventListener('input', function() {
-            // Delayed update to prevent frequent updates during typing
-            setTimeout(function() {
-                updateContentPreview();
-            }, 300); // Adjust delay time as needed
+            updateContent();
         });
     }
 
@@ -252,15 +249,6 @@ if (typeof(window) === 'object') {
             sdk.setSuperContent(updatedContent, function(newSuperContent) {
                 console.log('Super Content set:', newSuperContent);
             });
-        });
-    }
-
-    // Update Live Preview in Salesforce Marketing Cloud
-    function updateContentPreview() {
-        const richTextField = document.getElementById("richTextField").contentWindow.document;
-        var content = richTextField.body.innerHTML;
-        sdk.setSuperContent(content, function(newSuperContent) {
-            console.log('Live Preview Updated:', newSuperContent);
         });
     }
 
