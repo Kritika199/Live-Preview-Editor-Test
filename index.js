@@ -150,7 +150,7 @@ if (typeof(window) === 'object') {
         tabs: [
             'htmlblock',
             'stylingblock',
-            'richtextblock' // assuming 'richtextblock' is the ID of the rich text editor block
+            'textblock' // assuming 'richtextblock' is the ID of the rich text editor block
         ],
         onEditClose: function() {
             // Save content before closing the block
@@ -183,7 +183,7 @@ if (typeof(window) === 'object') {
 
     // Execute Rich Text Commands
     function execCommand(command) {
-        const richTextField = document.getElementById("richtextblock").contentWindow.document;
+        const richTextField = document.getElementById("textblock").contentWindow.document;
         richTextField.execCommand(command, false, null);
 
         // Update content and super content in Salesforce Marketing Cloud
@@ -200,7 +200,7 @@ if (typeof(window) === 'object') {
 
     // Update Content in Salesforce Marketing Cloud
     function updateContent() {
-        const richTextField = document.getElementById("richtextblock").contentWindow.document;
+        const richTextField = document.getElementById("textblock").contentWindow.document;
         var content = richTextField.body.innerHTML;
         sdk.setContent(content, function(updatedContent) {
             console.log('Updated Content:', updatedContent);
