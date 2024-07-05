@@ -253,7 +253,7 @@ if (typeof(window) === 'object') {
         tabs: [
             'htmlblock',
             'stylingblock',
-            'Text'
+            'richTextField'
         ],
         onEditClose: function() {
             // Save content before closing the block
@@ -263,14 +263,14 @@ if (typeof(window) === 'object') {
 
     // Enable Edit Mode for Rich Text Editor
     function enableEditMode() {
-        const Text = document.getElementById("Text").contentWindow.document;
-        Text.designMode = "on";
+        const richTextField = document.getElementById("richTextField").contentWindow.document;
+        richTextField.designMode = "on";
 
         // Load the initial content from Salesforce Marketing Cloud
         sdk.getContent(function(content) {
-            Text.open();
-            Text.write(content || '');
-            Text.close();
+            richTextField.open();
+            richTextField.write(content || '');
+            richTextField.close();
 
             // Set the initial content in Salesforce Marketing Cloud
             sdk.setContent(content, function(newContent) {
@@ -285,16 +285,16 @@ if (typeof(window) === 'object') {
 
     // Execute Rich Text Commands
     function Edit(command) {
-        const Text = document.getElementById("Text").contentWindow.document;
-        Text.execCommand(command, false, null);
+        const Text = document.getElementById("richTextField").contentWindow.document;
+        richTextField.execCommand(command, false, null);
 
         // Update the content in Salesforce Marketing Cloud
         updateContent();
     }
 
     function execVal(command, value) {
-        const Text = document.getElementById("Text").contentWindow.document;
-        Text.execCommand(command, false, value);
+        const richTextField = document.getElementById("richTextField").contentWindow.document;
+        richTextField.execCommand(command, false, value);
 
         // Update the content in Salesforce Marketing Cloud
         updateContent();
@@ -302,8 +302,8 @@ if (typeof(window) === 'object') {
 
     // Update Content in Salesforce Marketing Cloud
     function updateContent() {
-        const Text = document.getElementById("Text").contentWindow.document;
-        var content = Text.body.innerHTML;
+        const Text = document.getElementById("richTextField").contentWindow.document;
+        var content = richTextField.body.innerHTML;
         sdk.setContent(content, function(updatedContent) {
             console.log('Updated Content:', updatedContent);
             sdk.setSuperContent(updatedContent, function(newSuperContent) {
