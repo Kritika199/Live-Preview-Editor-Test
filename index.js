@@ -265,7 +265,7 @@ if (typeof(window) === 'object') {
             richTextField.close();
 
             // Set the initial content as the super content for live preview
-            sdk.setSuperContent(richTextField, function(newSuperContent) {
+            sdk.setSuperContent(richTextField.body.innerHTML, function(newSuperContent) {
                 console.log('Super Content set:', newSuperContent);
             });
         });
