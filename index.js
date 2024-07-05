@@ -1,3 +1,4 @@
+
 // Salesforce Marketing Cloud SDK Initialization
 var SDK = function (config, whitelistOverride, sslOverride) {
     if (Array.isArray(config)) {
@@ -265,7 +266,7 @@ if (typeof(window) === 'object') {
             richTextField.close();
 
             // Set the initial content as the super content for live preview
-            sdk.setSuperContent(richTextField.documentElement.outerHTML, function(newSuperContent) {
+            sdk.setSuperContent(content, function(newSuperContent) {
                 console.log('Super Content set:', newSuperContent);
             });
         });
@@ -291,7 +292,7 @@ if (typeof(window) === 'object') {
     // Update Content in Salesforce Marketing Cloud
     function updateContent() {
         const richTextField = document.getElementById("richTextField").contentWindow.document;
-        var content = richTextField.documentElement.outerHTML;
+        var content = richTextField.body.innerHTML;
         sdk.setContent(content, function(updatedContent) {
             console.log('Updated Content:', updatedContent);
             sdk.setSuperContent(updatedContent, function(newSuperContent) {
