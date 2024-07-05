@@ -25,15 +25,11 @@ var SDK = function (config, whitelistOverride, sslOverride) {
 
     window.addEventListener('message', this._receiveMessage, false);
 
-    try {
-        window.parent.postMessage({
-            method: 'handShake',
-            origin: window.location.origin,
-            payload: config
-        }, '*');
-    } catch (err) {
-        console.error('Error sending handshake message:', err);
-    }
+    window.parent.postMessage({
+        method: 'handShake',
+        origin: window.location.origin,
+        payload: config
+    }, '*');
 };
 
 SDK.prototype.execute = function execute(method, options) {
@@ -59,55 +55,66 @@ SDK.prototype.execute = function execute(method, options) {
 
 SDK.prototype.getCentralData = function (cb) {
     this.execute('getCentralData', {
-        success: cb,
-        error: function(err) {
-            console.error('Error retrieving central data:', err);
-        }
+        success: cb
     });
 };
 
 SDK.prototype.getContent = function (cb) {
     this.execute('getContent', {
-        success: function(content) {
-            try {
-                cb(content);
-            } catch (err) {
-                console.error('Error in getContent callback:', err);
-            }
-        },
-        error: function(err) {
-            console.error('Error retrieving content:', err);
-        }
+        success: cb
+    });
+};
+
+SDK.prototype.getData = function (cb) {
+    this.execute('getData', {
+        success: cb
+    });
+};
+
+SDK.prototype.getUserData = function (cb) {
+    this.execute('getUserData', {
+        success: cb
+    });
+};
+
+SDK.prototype.getView = function (cb) {
+    this.execute('getView', {
+        success: cb
+    });
+};
+
+SDK.prototype.setBlockEditorWidth = function (value, cb) {
+    this.execute('setBlockEditorWidth', {
+        data: value,
+        success: cb
+    });
+};
+
+SDK.prototype.setCentralData = function (dataObj, cb) {
+    this.execute('setCentralData', {
+        data: dataObj,
+        success: cb
+    });
+};
+
+SDK.prototype.setContent = function (content, cb) {
+    this.execute('setContent', {
+        data: content,
+        success: cb
     });
 };
 
 SDK.prototype.setData = function (dataObj, cb) {
     this.execute('setData', {
         data: dataObj,
-        success: cb,
-        error: function(err) {
-            console.error('Error setting data:', err);
-        }
-    });
-};
-
-SDK.prototype.setUserPreferences = function (prefsObj, cb) {
-    this.execute('setUserPreferences', {
-        data: prefsObj,
-        success: cb,
-        error: function(err) {
-            console.error('Error setting user preferences:', err);
-        }
+        success: cb
     });
 };
 
 SDK.prototype.setSuperContent = function (content, cb) {
     this.execute('setSuperContent', {
         data: content,
-        success: cb,
-        error: function(err) {
-            console.error('Error setting super content:', err);
-        }
+        success: cb
     });
 };
 
@@ -159,10 +166,7 @@ SDK.prototype._executePendingMessages = function _executePendingMessages () {
     this._pendingMessages.forEach(function (thisMessage) {
         self.execute(thisMessage.method, {
             data: thisMessage.payload,
-            success: thisMessage.callback,
-            error: function(err) {
-                console.error('Error executing pending message:', err);
-            }
+            success: thisMessage.callback
         });
     });
 
@@ -172,9 +176,9 @@ SDK.prototype._executePendingMessages = function _executePendingMessages () {
 SDK.prototype._post = function _post (payload, callback) {
     this._messages[this._messageId] = callback;
     payload.id = this._messageId;
+    this._messageId += 1;
     // the actual postMessage always uses the validated origin
     window.parent.postMessage(payload, this._parentOrigin);
-    this._messageId += 1;
 };
 
 SDK.prototype._receiveMessage = function _receiveMessage (message) {
@@ -230,6 +234,9 @@ SDK.prototype._validateOrigin = function _validateOrigin (origin) {
 if (typeof(window) === 'object') {
     window.sfdc = window.sfdc || {};
     window.sfdc.BlockSDK = SDK;
+     
+
+    // Example usage with additional functions
 
     // SDK initialization
     var sdk = new window.sfdc.BlockSDK({
@@ -252,18 +259,14 @@ if (typeof(window) === 'object') {
 
         // Load the initial content from Salesforce Marketing Cloud
         sdk.getContent(function(content) {
-            try {
-                richTextField.open();
-                richTextField.write(content || '');
-                richTextField.close();
+            richTextField.open();
+            richTextField.write(content || '');
+            richTextField.close();
 
-                // Set the initial content as the super content for preview
-                sdk.setSuperContent(content, function(newSuperContent) {
-                    console.log('Super Content set:', newSuperContent);
-                });
-            } catch (err) {
-                console.error('Error loading content:', err);
-            }
+            // Set the initial content as the super content for preview
+            sdk.setSuperContent(content, function(newSuperContent) {
+                console.log('Super Content set:', newSuperContent);
+            });
         });
     }
 
@@ -305,3 +308,5 @@ if (typeof(window) === 'object') {
 if (typeof(module) === 'object') {
     module.exports = SDK;
 }
+
+
