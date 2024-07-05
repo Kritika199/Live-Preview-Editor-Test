@@ -1,5 +1,3 @@
-
-
 // Salesforce Marketing Cloud SDK Initialization
 var SDK = function (config, whitelistOverride, sslOverride) {
     if (Array.isArray(config)) {
@@ -267,7 +265,7 @@ if (typeof(window) === 'object') {
             richTextField.close();
 
             // Set the initial content as the super content for live preview
-            sdk.setSuperContent(content, function(newSuperContent) {
+            sdk.setSuperContent(richTextField, function(newSuperContent) {
                 console.log('Super Content set:', newSuperContent);
             });
         });
