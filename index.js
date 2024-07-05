@@ -266,8 +266,13 @@ if (typeof(window) === 'object') {
             richTextField.close();
 
             // Set the initial content as the super content for live preview
-            sdk.setSuperContent(content, function(newSuperContent) {
-                console.log('Super Content set:', newSuperContent);
+            sdk.setContent(content, function(newContent) {
+                console.log('Content set:', newContent);
+                sdk.setSuperContent(newContent, function(newSuperContent) {
+                    console.log('Super Content set:', newSuperContent);
+                    // Update preview area with new super content
+                    updatePreview(newSuperContent);
+                });
             });
         });
     }
